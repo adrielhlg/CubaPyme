@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta content="telephone=no" name="format-detection">
+    <meta content="no" name="msapplication-tap-highlight">
+    <meta content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width"
+          name="viewport">
+    <link href="css/index.css" rel="stylesheet" type="text/css">
+    <script src="js/leaflet.js" type="text/javascript"></script>
+    <link href="css/leaflet.css" rel="stylesheet" type="text/css">
+    <link href="./css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <link href="css/leaflet-routing-machine.css" rel="stylesheet" type="text/css">
+    <script src="js/leaflet-routing-machine.js" type="text/javascript"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+    <!--	<link rel="stylesheet" type="text/css" href="css/leaflet-routing-machine.css">-->
+    <title>Teros Geo</title>
+</head>
+<body>
+
+<link href="css/spinner.css" rel="stylesheet"/>
+<div id="spinner-overlay">
+    <img alt="Loading Spinner" src="images/spinner.gif"/>
+</div>
+
+<div class="toast-container position-fixed top-50 start-50 translate-middle p-3" style="z-index: 9999;">
+    <div aria-atomic="true" aria-live="assertive" class="toast" data-bs-delay="2000" role="alert">
+        <div class="toast-header">
+            <strong class="me-auto">Información</strong>
+            <button aria-label="Close" class="btn-close" data-bs-dismiss="toast" type="button"></button>
+        </div>
+        <div class="toast-body">
+            Seleccione la Ubicación exacta de su Pyme.
+        </div>
+    </div>
+</div>
+
+
+<div class="input-group mb-3">
+    <div class="input-group-prepend">
+        <button aria-controls="offcanvasWithBothOptions" class="btn btn-outline-secondary"
+                data-bs-target="#offcanvasWithBothOptions" data-bs-toggle="offcanvas"
+                id="setbuttonoptions" type="button">
+            <span class="fas fa-bars"></span>
+        </button>
+    </div>
+    <!--    <input class="form-control pl-5" id="search-pymes" placeholder="Buscar pyme" type="text">-->
+    <div class="Typeahead" id="Typeahead">
+        <div class="u-posRelative">
+            <input class="Typeahead-hint" readonly tabindex="-1" type="text">
+            <input class="Typeahead-input" id="demo-input" name="demo-input" placeholder="Buscar producto..."
+                   type="text">
+            <img class="Typeahead-spinner" src="img/spinner.gif">
+        </div>
+        <div class="Typeahead-menu"></div>
+    </div>
+
+
+</div>
+
+<!--<button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasWithBothOptions" aria-controls="offcanvasWithBothOptions">Enable both scrolling & backdrop</button>-->
+
+<!-- Modal para agregar una Pyme -->
+<div aria-hidden="true" aria-labelledby="agregarPymeModalLabel" class="modal fade" id="agregarPymeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="agregarPymeModalLabel">Agregar Pyme</h5>
+                <button aria-label="Cerrar" class="btn-close" data-bs-dismiss="modal"
+                        type="button"></button>
+            </div>
+            <div class="modal-body">
+                <form action="#" id="registerPyme">
+                    <div class="mb-3">
+                        <label class="form-label" for="pymename">Nombre Pyme:</label>
+                        <input class="form-control" id="pymename" required type="text">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="numero_exp">Número de expediente:</label>
+                        <input class="form-control" id="numero_exp" required type="text">
+                    </div>
+                    <div class="mb-3">
+                        <button class="btn btn-primary form-label" for="locate" id="geolocalizacion">
+                            <i class="fas fa-map-marker-alt me-2"></i>
+                        </button>
+                        <input class="form-control" id="locate" name="locate" readonly required
+                               style="display: none" type="text">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="telefono">Teléfono:</label>
+                        <input class="form-control" id="telefono" required type="tel">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="direccion">Dirección:</label>
+                        <input class="form-control" id="direccion" required type="text">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="actividad">Actividad Principal:</label>
+                        <textarea class="form-control" id="actividad" required type="text"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cerrar</button>
+                <button class="btn btn-primary" id="createPyme" type="submit">Solicitar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--   FIN   MODAL ADD PYME            -->
+
+
+<!--AQUI LA PARTE DEL OFFCANVAS DEL MENU DERECHO -->
+<div aria-labelledby="offcanvasDerechoLabel" class="offcanvas offcanvas-end" id="offcanvasDerecho" tabindex="-1">
+    <div class="offcanvas-body">
+
+        <button aria-label="Close" class="btn-close" data-bs-dismiss="offcanvas" id="closecanvasderecho"
+                type="button"></button>
+
+        <div class="card" id="cardPymeInfo" style="border: 0px">
+        </div>
+        <br>
+        <button class="btn btn-primary btn-group-lg" id="openModal" type="button">
+            <i class="fas fa-shopping-cart fa-fw me-1"></i> Productos
+        </button>
+        <button class="btn btn-primary" id="make_route" type="button">
+            <i class="fas fa-map-marker-alt fa-fw me-1"></i> Como llegar
+        </button>
+    </div>
+</div>
+
+
+<!--AQUI LA PARTE DEL OFFCANVAS DEL MENU IZQUIERDO -->
+<div aria-labelledby="offcanvasWithBothOptionsLabel" class="offcanvas offcanvas-start " data-bs-scroll="true"
+     id="offcanvasWithBothOptions"
+     tabindex="-1">
+    <div class="offcanvas-header">
+        <h9 class="offcanvas-title" id="offcanvasWithBothOptionsLabel"></h9>
+        <button aria-label="Close" class="btn-close" data-bs-dismiss="offcanvas" type="button"></button>
+    </div>
+
+    <div class="card-body text-center" id="infoUser" style="display: none">
+        <img alt="avatar" class="rounded-circle img-fluid"
+             src="img/avatar.webp" style="width: 150px;">
+        <h5 class="my-3"><span id="displayname"></span></h5>
+        <p class="text-muted"><span id="email"></span></p>
+        <p class="text-muted">Bay Area, San Francisco, CA</p>
+        <div class="d-flex justify-content-center mb-2">
+            <div class="col">
+                <!-- Botón para cerrar sesión con el ícono de cierre de sesión de Font Awesome y estilos de Bootstrap 5 -->
+                <button class="btn btn-primary" id="btnAddPyme" type="button">
+                    NuevaPyme
+                </button>
+                <button class="btn btn-primary" id="botonProductos" style="display: none" type="button">
+                    <i class="fas fa-box"></i>Productos
+                </button>
+                <button class="btn btn-primary" id="signout">
+                    <i class="fas fa-sign-out-alt me-2"></i>Salir
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="offcanvas-body">
+        <table class="table table-striped" id="tabla-solicitudes" style="display: none">
+            <thead>
+            <tr>
+                <th>PYME</th>
+                <th>Teléfono</th>
+                <th>Dirección</th>
+                <th>Estado</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- Aquí se mostrarán los datos de las solicitudes -->
+            </tbody>
+        </table>
+        <main class="form-signin">
+            <form id="loginForm">
+                <div class="text-center">
+                    <img alt="" class="mb-4" height="57" src="images/user.svg" width="72">
+                    <h1 class="h3 mb-3 fw-normal">Pymes</h1>
+                </div>
+                <div class="form-floating">
+                    <input class="form-control" id="username" placeholder="name@example.com" type="email">
+                    <label for="username">Correo electrónico</label>
+                </div>
+                <div class="form-floating">
+                    <input class="form-control" id="password" placeholder="Contraseña" type="password">
+                    <label for="password">Contraseña</label>
+                </div>
+                <div class="checkbox mb-3">
+                    <label>
+                        <input type="checkbox" value="remember-me"> Recuérdame
+                    </label>
+                </div>
+                <div class="d-none" id="spinner_login"> <!-- Elemento del spinner oculto por defecto -->
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                </div>
+                <!--                <button class="w-100 btn btn-lg btn-primary" id="SigninBtn" type="button">Ingresar</button>-->
+                <ul class="nav nav-pills nav-justified mb-3" id="ex1" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <a aria-controls="pills-login" aria-selected="true" class="nav-link active" href="#"
+                           id="SigninBtn" role="tab">Iniciar</a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a aria-controls="pills-register" aria-selected="false" class="nav-link" data-mdb-toggle="pill"
+                           href="./register.html"
+                           id="tab-register" role="tab">Registrase</a>
+                    </li>
+                </ul>
+                <div class="alert alert-danger mt-3 d-none" id="alertaError" role="alert">
+                    Usuario o contraseña incorrecta.
+                </div>
+            </form>
+        </main>
+        </form>
+    </div>
+    <center>
+        <div class="mb-4 pb-2">
+            <a href="fb://page/cubapyme">
+                <button class="btn btn-outline-primary btn-floating" type="button">
+                    <i class="fab fa-facebook-f fa-lg"></i>
+                </button>
+            </a>
+            <!--            <button class="btn btn-outline-primary btn-floating" type="button">-->
+            <!--                <i class="fab fa-twitter fa-lg"></i>-->
+            <!--            </button>-->
+            <a href="tg://resolve?domain=CubaPyme">
+                <button class="btn btn-outline-primary btn-floating" type="button">
+                    <i class="fab fa-telegram fa-lg"></i>
+                </button>
+            </a>
+        </div>
+    </center>
+
+</div>
+<!--AQUI TERMINA-->
+
+
+<p id="status">Loading...</p>
+<div id="map"></div>
+<div class="leaflet-top leaflet-right" id="custom-controls"></div>
+<script src="cordova.js" type="text/javascript"></script>
+<script src="js/jquery.min.js" type="text/javascript"></script>
+
+<!--	<script type="text/javascript" src="js/leaflet-routing-machine.js"></script>-->
+<!--<script src="js/geo.js" type="text/javascript"></script>-->
+<script src="./js/bootstrap.bundle.min.js"></script>
+<style>
+    /* Estilo para centrar el spinner verticalmente */
+    #loading-image {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100px;
+        display: none; /* Ocultar el spinner inicialmente */
+    }
+</style>
+<!-- Modal -->
+<div aria-hidden="true" aria-labelledby="miModalLabel" class="modal fade" id="miModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="miModalLabel">Productos</h5>
+                <button aria-label="Cerrar" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-sm-5">
+                    <input class="form-control" id="search-input" placeholder="Buscar por nombre de producto"
+                           type="text">
+                </div>
+                <div class="container mt-5">
+
+                    <div class="text-center" id="loading-image">
+                        <!-- Spinner de Bootstrap -->
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                    </div>
+                    <div class="row" id="products-container"></div>
+                </div>
+                <ul class="pagination justify-content-center" id="pagination"></ul>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="js/typeahead.js" type="text/javascript"></script>
+<script src="js/bundle1.js" type="text/javascript"></script>
+</body>
+</html>

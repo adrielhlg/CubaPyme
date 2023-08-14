@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<script src="cordova.js" type="text/javascript"></script>
+<script src="https://cdn.tiny.cloud/1/ue8da29cvj40d6srjlw2p9ecrizz1n9j95y6sh331m6w7avo/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+<style>
+    .tox tox-tinymce{
+        height: 200px;
+    }
+    /* Custom styles for the floating button */
+    .floating-btn {
+        position: fixed;
+        bottom: 20px; /* Adjust this value to control the distance from the bottom */
+        right: 20px; /* Adjust this value to control the distance from the right */
+        z-index: 9999; /* Make sure the button appears above other content */
+        width: 60px; /* Adjust this value to make the button larger */
+        height: 60px; /* Adjust this value to make the button larger */
+        border-radius: 50%; /* Make the button round */
+        background-color: #007bff; /* Change the background color to the desired color */
+        color: #fff; /* Change the text color to contrast with the background */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 24px; /* Adjust this value to control the icon size */
+    }
+    .btnEditar {
+        background-color: transparent;
+        border: none; /* Opcional, para eliminar el borde si lo tiene por defecto */
+    }
+    .btnEliminar {
+        background-color: transparent;
+        border: none; /* Opcional, para eliminar el borde si lo tiene por defecto */
+    }
+</style>
+<a class="floating-btn" data-target="#modalAgregar" data-toggle="modal" href="#" id="btnAgregar">
+    <i class="fa fa-plus"></i>
+</a>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CRUD de Productos</title>
+    <!-- Agregar enlaces a los archivos CSS de Bootstrap -->
+    <link href="css/bootstrap.min4.5.css" rel="stylesheet">
+</head>
+<body>
+<link href="css/spinner.css" rel="stylesheet"/>
+<div id="spinner-overlay">
+    <img alt="Loading Spinner" src="images/spinner.gif"/>
+</div>
+<!-- Agrega Font Awesome CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+
+
+<div class="container mt-4">
+    <table class="table mt-4">
+        <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Precio</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody id="productosTabla"></tbody>
+    </table>
+</div>
+
+
+<!-- Elemento HTML para mostrar el spinner -->
+<div id="spinner" style="display: none; left: 50%; position: absolute;">
+    <i class="fas fa-spinner fa-spin"></i> Cargando...
+</div>
+
+
+<!-- Modal para agregar producto -->
+<div aria-hidden="true" aria-labelledby="modalAgregarLabel" class="modal fade" id="modalAgregar" role="dialog"
+     tabindex="-1">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAgregarLabel">Agregar Producto</h5>
+                <button aria-label="Close" class="close" data-dismiss="modal" type="button">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form action="#" enctype="multipart/form-data" id="productForm">
+                    <div class="form-group">
+                        <label for="nombre">Nombre del Producto:</label>
+                        <input class="form-control" id="nombre" name="nombre" required type="text">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="precio">Precio del Producto:</label>
+                        <input class="form-control" id="precio" name="precio" required step="0.01" type="number">
+                    </div>
+                    <div class="form-group">
+                        <label for="descripcionproduct">Desciptci&oacute;n del Producto:</label>
+                        <textarea class="form-control" id="descripcionproduct" name="descripcionproduct" ></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="imagen">Imagen del Producto:</label>
+                        <input accept="image/*" class="form-control-file" id="imagen" name="imagen"
+                               type="file">
+                    </div>
+
+                    <!-- Elemento de vista previa de la imagen -->
+                    <div class="mt-3" id="imagenPreview"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-dismiss="modal" type="button">Cancelar</button>
+                <button class="btn btn-primary" form="productForm" type="submit">Guardar Producto</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para editar producto -->
+<div aria-hidden="true" aria-labelledby="modalEditarLabel" class="modal fade" id="modalEditar" role="dialog"
+     tabindex="-1">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEditarLabel">Editar Producto</h5>
+                <button aria-label="Close" class="close" data-dismiss="modal" type="button">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form enctype="multipart/form-data" id="editProductForm">
+                    <input class="form-control" id="idproduct" name="ID" style="display: none;" type="text">
+                    <div class="form-group">
+                        <label for="editNombre">Nombre del Producto:</label>
+                        <input class="form-control" id="editNombre" name="nombre" required type="text">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editPrecio">Precio del Producto:</label>
+                        <input class="form-control" id="editPrecio" name="precio" required step="0.01" type="number">
+                    </div>
+                    <div class="form-group">
+                        <label for="editdescripcion">Desciptci&oacute;n del Producto:</label>
+                        <textarea class="form-control" id="editdescripcion" name="editdescripcion" ></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editImagen">Imagen del Producto:</label>
+                        <input accept="image/*" class="form-control-file" id="editImagen" name="imagen" type="file">
+                    </div>
+
+                    <!-- Elemento de vista previa de la imagen -->
+                    <div class="mt-3" id="editImagenPreview"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-dismiss="modal" type="button">Cancelar</button>
+                <button class="btn btn-primary" form="editProductForm" type="submit">Actualizar Producto</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+ tinymce.init({
+        selector: 'textarea',
+        plugins: 'lists table',
+        height: '200px',
+        statusbar: false,
+        toolbar: 'bold italic | numlist bullist',
+        tinycomments_mode: 'embedded',
+        tinycomments_author: 'Author name',
+        mergetags_list: [
+            { value: 'First.Name', title: 'First Name' },
+            { value: 'Email', title: 'Email' },
+        ],
+        menubar: false,
+
+    });
+</script>
+
+<!-- Agregar enlace al archivo JavaScript de jQuery -->
+<script src="js/jquery.min.js"></script>
+<script src="js/bundle2.js" type="text/javascript"></script>
+<!--<script src="js/product.js" type="text/javascript"></script>-->
+
+<!-- Agregar enlace al archivo JavaScript de Bootstrap -->
+<script src="js/bootstrap.min4.5.js"></script>
+</body>
+</html>
